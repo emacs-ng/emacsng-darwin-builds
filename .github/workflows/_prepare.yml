@@ -22,7 +22,7 @@ jobs:
       - name: Checkout build-emacsng-for-macos repo
         uses: actions/checkout@v3
         with:
-          repository: declantsien/build-emacs-webrender
+          repository: emacs-ng/build-emacsng-for-macos
           ref: ${{ inputs.builder_ref }}
           path: builder
       - name: Store builder Git SHA
