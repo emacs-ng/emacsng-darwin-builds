@@ -20,6 +20,8 @@ on:
 jobs:
   github:
     runs-on: macos-11
+    outputs:
+      check: ${{ steps.check.outputs.result }}
     steps:
       - name: Download pre-built emacs-builder artifact
         uses: actions/download-artifact@v3
@@ -40,18 +42,25 @@ jobs:
         with:
           name: ${{ inputs.dmg_artifact }}
           path: builds
+      - name: Check if builds folder exists
+        id: check
+        continue-on-error: true
+        run: |
+          echo "result=$([ -d 'builds' ] && echo 'ok' || echo 'fail')" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish disk images to a GitHub Release
-        if: ${{ steps.dmg.outputs.result != 'fail' }}
+        if: ${{ steps.check.outputs.result != 'fail' }}
         run: >-
           bin/emacs-builder -l debug release --plan build-plan.yml publish
           $(find builds -name '*.dmg' -or -name '*.sha256')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # - name: Trigger update casks workflow in homebrew tap
-      #   if: ${{ steps.dmg.outputs.result != 'fail' && inputs.testBuildName == '' }}
+      #   if: ${{ steps.check.outputs.result != 'fail' && inputs.testBuildName == '' }}
       #   run: >-
       #     gh workflow run --repo emacs-ng/homebrew-emacsng-builds update-casks.yml
       #   env:
       #     GITHUB_TOKEN: ${{ secrets.TAP_REPO_TOKEN }}
       - run: echo 'No DMG artifact available, was there a new commit to build?'
-        if: ${{ steps.dmg.outputs.result == 'fail' }}
+        if: ${{ steps.check.outputs.result == 'fail' }}
