@@ -1,0 +1,79 @@
+#+html: <p align="center">
+#+html: <img width="160px" src="https://raw.githubusercontent.com/emacs-ng/emacs-ng/master/images/logo.png" alt="Logo">
+#+html: </p>
+#+html: <h1 align="center">Emacs NG Builds</h1>
+#+html: <p align="center">
+#+html: <a href="https://github.com/emacs-ng/emacs-ng/actions/workflows/test.yml"><img alt="General" src="https://github.com/emacs-ng/emacs-ng/actions/workflows/test.yml/badge.svg"></a>
+#+html: <a href="https://github.com/emacs-ng/emacsng-darwin-builds/actions/workflows/emacsng.yml"><img alt="Emacs NG" src="https://github.com/emacs-ng/emacsng-darwin-builds/actions/workflows/emacsng.yml/badge.svg"></a>
+#+html: <a href="https://github.com/emacs-ng/emacsng-darwin-builds/actions/workflows/emacsng-webrender.yml"><img alt="Emacs NG" src="https://github.com/emacs-ng/emacsng-darwin-builds/actions/workflows/emacsng-webrender.yml/badge.svg"></a>
+#+html: </p">
+
+** Features
+
+*** Webrender build
+- Webrender support (experimental).
+- SVG rendering not supported yet.
+- xwidget not surpport yet.
+
+*** Default build
+- Self-contained Emacs.app application bundle, with no external dependencies.
+- Javascript support (coming soon).
+- Native compilation ([[https://www.emacswiki.org/emacs/GccEmacs][gccemacs]]), only in Emacs 28.x and later builds.
+- Native JSON parsing via libjansson.
+- SVG rendering via librsvg.
+- Various image formats are supported via macOS native image APIs.
+- Xwidget-webkit support is enabled without Webrender, allowing access to a embedded WebKit-based browser with =M-x xwidget-webkit-browse-url=.
+- Native XML parsing via libxml2.
+- Dynamic module loading.
+- Includes the [[https://github.com/d12frosted/homebrew-emacs-plus/blob/master/patches/emacs-28/fix-window-role.patch][fix-window-role]], [[https://github.com/d12frosted/homebrew-emacs-plus/blob/master/patches/emacs-28/system-appearance.patch][system-appearance]], and [[https://github.com/d12frosted/homebrew-emacs-plus/blob/master/patches/emacs-29/round-undecorated-frame.patch][round-undecorated-frame]] patches from the excellent [[https://github.com/d12frosted/homebrew-emacs-plus][emacs-plus]] project.
+- Emacs source is fetched from the [[https://github.com/emacs-mirror/emacs][emacs-mirror/emacs]] GitHub repository.
+- Build creation is transparent and public through the use of GitHub Actions, allowing anyone to inspect git commit SHAs, full source code, and exact commands used to produce a build.
+- Emacs.app is signed with a developer certificate and notarized by Apple.
+- Uses [[https://github.com/emacs-ng/build-emacsng-for-macos][build-emacsng-for-macos]] to build the self-contained application bundle.
+
+** System Requirements
+
+- macOS 11.x (Big Sur) or later (uses Rosetta2 on Apple Silicon machines).
+- Xcode Command Line Tools for native compilation (Emacs 28.x and later).
+
+** Installation
+*** Manual Download
+See the [[https://github.com/emacs-ng/emacsng-darwin-builds/releases][Releases]] page to download latest builds, or [[https://github.com/emacs-ng/emacsng-darwin-builds/releases][here]] for the latest stable release.
+
+*** TODO Homebrew Cask
+
+** Use Emacs.app as =emacs= CLI Tool
+*** Installed via Homebrew Cask
+The cask installation method sets up CLI usage automatically by exposing a =emacs= command. However it will launch Emacs into GUI mode. To instead have =emacs= in your terminal open a terminal instance of Emacs, add the following alias to your shell setup:
+
+#+begin_src shell
+  alias emacs="emacs -nw"
+#+end_src
+
+*** Installed Manually
+Builds come with a custom =emacs= shell script launcher for use from the command line, located next to =emacsclient= in =Emacs.app/Contents/MacOS/bin=.
+
+The custom =emacs= script makes sure to use the main =Emacs.app/Contents/MacOS/Emacs= executable from the correct path, ensuring it finds all the relevant dependencies within the Emacs.app bundle, regardless of if it's exposed via =PATH= or symlinked from elsewhere.
+
+To use it, simply add =Emacs.app/Contents/MacOS/bin= to your =PATH=. For example, if you place Emacs.app in =/Applications=:
+
+#+begin_src shell
+  if [ -d "/Applications/Emacs.app/Contents/MacOS/bin" ]; then
+    export PATH="/Applications/Emacs.app/Contents/MacOS/bin:$PATH"
+    alias emacs="emacs -nw" # Always launch "emacs" in terminal mode.
+  fi
+#+end_src
+
+If you want =emacs= in your terminal to launch a GUI instance of Emacs, don't use the alias from the above example.
+
+** Build Process
+Building Emacs is done using the [[https://github.com/emacs-ng/build-emacsng-for-macos][emacs-ng/build-emacsng-for-macos]] build script, executed within a GitHub Actions [[https://github.com/emacs-ng/emacs-darwin-builds/blob/main/.github/workflows/build.yml][workflow]]. This is why macOS 11.x (Big Sur) or later is required, as it's the oldest version of macOS available in GitHub Actions.
+
+Full history for all builds is available on GitHub Actions [[https://github.com/emacs-ng/emacsng-darwin-builds/actions][here]]. Build logs are only retained by GitHub for 90 days though.
+
+Builds are scheduled for 0:00 UTC every night, based on the latest commit from the =master= branch of the [[https://github.com/emacs-ng/emacs-ng][emacs-ng/emacs-ng]] repository. This means a nightly build will only be produced if there have been new commits since the last nightly build.
+
+** TODO Application Signing / Trust
+
+** Issues / To-Do
+Please see [[https://github.com/emacs-ng/emacsng-darwin-builds/issues][Issues]] for details of things to come, or to report issues.
